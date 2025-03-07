@@ -45,16 +45,16 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-float32_t angle = 0;
+float32_t angle = 0U;
 //#define PI 3.1415f
 // A
 
+float32_t angle = 0U;
 uint32_t uf = 5000U;  // Половина амплитуда A/2 = ARR/2  (count_period / 2 = 10000 /2)
-uint16_t fo = 4000U; // Опорная частота ШИМ  (настройка таймера sys_clock / prescaler / count_period = 80e6 / 2 / 10000 = 4000 )
-
+uint32_t fo = 4000U; // Опорная частота ШИМ  (настройка таймера sys_clock / prescaler / count_period = 80e6 / 2 / 10000 = 4000 )
 // исправить частоту и кол-во элементов массива
-uint16_t f = 40U;  // частота синусоиды - задание
-volatile uint32_t sindat[300]={0,};   //  кол-во элементов массива =  fo / f * 3;   4000 / 50 * 3 =240
+uint32_t f = 20U;  // частота синусоиды - задание
+volatile uint32_t sindat[600]={0,};   //  кол-во элементов массива =  fo / f * 3;   4000 / 50 * 3 =240
 
 
 /* USER CODE END PV */
@@ -81,6 +81,7 @@ int main(void)
 
 	// не должно выходить за границы элементов sindat
 	uint32_t len = fo / f;
+	uint32_t dma_len = 3 * len;
 //	 size_t n = sizeof(sindat) / sizeof(sindat[0]);
 //	 if(n > 1000) len = 1000U;
 
@@ -111,7 +112,7 @@ int main(void)
 //  uf = 500u * ((float32_t)freq / 50);
 
   for(uint8_t i = 0; i<len; i++) { // опорная частота шим 4кГц/50Гц
-	  angle = i * (360U / len); // угол отсчета 360/80 в градусах 4.5f
+	  angle = i * (360.0f / (float32_t)len); // угол отсчета 360/80 в градусах 4.5f
 	  //angle = i * 0.07853981634f; // угол отсчета  2*ПИ/80 в радианах
 	  // sindat[3*i] = uf + uf * arm_sin_f32(angle);
 	  sindat[3*i] = (uint32_t)(uf + uf * arm_sin_f32((angle * PI)/180)); // заполняем массив
@@ -125,17 +126,17 @@ int main(void)
 
   // ____________________Фаза B____________________________
   for(uint8_t i = 0; i<len; i++) {
-	  angle = (i *(360U / len)) + 120;
+	  angle = (i * (360.0f / (float32_t)len)) + 120;
 	  sindat[(3*i) + 1] = (uint32_t)( uf + uf * arm_sin_f32((angle * PI)/180));
   }
 
   // ____________________Фаза С____________________________
   for(uint8_t i = 0; i<len; i++) {
-	  angle = (i *(360U / len)) + 240;
+	  angle = (i * (360.0f / (float32_t)len)) + 240;
 	  sindat[(3*i) + 2] = (uint32_t)(uf + uf * arm_sin_f32((angle * PI)/180));
   }
 
-  HAL_TIM_DMABurst_MultiWriteStart(&htim1, TIM_DMABASE_CCR1, TIM_DMA_UPDATE, (uint32_t*)sindat, TIM_DMABURSTLENGTH_3TRANSFERS, len);
+  HAL_TIM_DMABurst_MultiWriteStart(&htim1, TIM_DMABASE_CCR1, TIM_DMA_UPDATE, (uint32_t*)sindat, TIM_DMABURSTLENGTH_3TRANSFERS, dma_len);
 
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);

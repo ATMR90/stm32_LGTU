@@ -69,7 +69,7 @@ void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.OCMode = TIM_OCMODE_PWM2;
   sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
@@ -84,7 +84,6 @@ void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_PWM2;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
@@ -125,8 +124,8 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
     hdma_tim1_up.Init.Direction = DMA_MEMORY_TO_PERIPH;
     hdma_tim1_up.Init.PeriphInc = DMA_PINC_DISABLE;
     hdma_tim1_up.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_tim1_up.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    hdma_tim1_up.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+    hdma_tim1_up.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hdma_tim1_up.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
     hdma_tim1_up.Init.Mode = DMA_CIRCULAR;
     hdma_tim1_up.Init.Priority = DMA_PRIORITY_LOW;
     hdma_tim1_up.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
